@@ -12,24 +12,17 @@ export app_build_version="${app_build_version:-`date +%s`}"
 export client_image_name="modoth/blog_math:${app_client_version:-latest}"
 export server_image_name="modoth/blog_server:${app_server_version:-latest}"
 
-docker_compose=docker-compose
-
-f_docker_compose(){
-    DOCKER_HOST=unix://$PWD/docker.sock docker-compose $@
-}
-
 if [[ -n "$server" ]]; then
     ssh -nNT -L $PWD/docker.sock:/var/run/docker.sock $server &
     ssh_pid=$!
     sleep 1
     trap "kill $ssh_pid || true; rm $PWD/docker.sock" EXIT
-    docker_compose=f_docker_compose
+    export DOCKER_HOST=unix://$PWD/docker.sock
 fi
 
 if [[ -n "$@" ]]; then
-    $docker_compose $@
+    docker-compose $@
     exit
 fi
-
-$docker_compose pull
-$docker_compose up -d --build
+docker pull ${client_image_name} && docker pull ${server_image_name}
+docker-compose up -d --build
