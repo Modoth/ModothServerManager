@@ -1,8 +1,12 @@
 version: '3.1'
 services: 
   web:
+    build:
+      context: .
+      args:
+        client_image_name: ${client_image_name}
     container_name: ${app_name}
-    image: ${client_image_name}
+    image: ${app_name}:${app_build_version}
     restart: always
     volumes:
       - /data/${app_name}/files:/usr/share/nginx/html/files
